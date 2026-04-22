@@ -10,20 +10,20 @@ const DEFAULT_CATEGORIES = {
   income: ['薪資', '獎金', '投資', '其他'],
 }
 
-async function sheetsGet() {
-  const res = await fetch(`${SHEETS_URL}?token=${encodeURIComponent(TOKEN)}`, {
-    redirect: 'follow',
-  })
-  const data = await res.json()
-  return data.records || []
+function buildUrl(params) {
+  const q = new URLSearchParams({ token: TOKEN, ...params })
+  return `${SHEETS_URL}?${q.toString()}`
 }
 
-async function sheetsPost(payload) {
-  await fetch(SHEETS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: JSON.stringify({ ...payload, token: TOKEN }),
-  })
+async function sheetsCall(params) {
+  const res = await fetch(buildUrl(params))
+  return res.json()
+}
+
+function parseDate(val) {
+  if (!val) return ''
+  if (typeof val === 'string' && val.length === 10) return val
+  return new Date(val).toISOString().slice(0, 10)
 }
 
 export function useRecords() {
@@ -40,9 +40,13 @@ export function useRecords() {
 
   useEffect(() => {
     setSyncing(true)
-    sheetsGet()
-      .then((rows) => {
-        const parsed = rows.map((r) => ({ ...r, amount: Number(r.amount) }))
+    sheetsCall({ action: 'read' })
+      .then((data) => {
+        const parsed = (data.records || []).map((r) => ({
+          ...r,
+          amount: Number(r.amount),
+          date: parseDate(r.date),
+        }))
         setRecords(parsed)
         localStorage.setItem(CACHE_KEY, JSON.stringify(parsed))
         setError(null)
@@ -67,7 +71,7 @@ export function useRecords() {
       localStorage.setItem(CACHE_KEY, JSON.stringify(updated))
       return updated
     })
-    await sheetsPost({ action: 'add', record: newRecord })
+    await sheetsCall({ action: 'add', record: JSON.stringify(newRecord) })
   }
 
   const updateRecord = async (id, updated) => {
@@ -77,7 +81,7 @@ export function useRecords() {
       return next
     })
     const record = records.find((r) => r.id === id)
-    await sheetsPost({ action: 'update', record: { ...record, ...updated } })
+    await sheetsCall({ action: 'update', record: JSON.stringify({ ...record, ...updated }) })
   }
 
   const deleteRecord = async (id) => {
@@ -86,7 +90,7 @@ export function useRecords() {
       localStorage.setItem(CACHE_KEY, JSON.stringify(next))
       return next
     })
-    await sheetsPost({ action: 'delete', id })
+    await sheetsCall({ action: 'delete', id })
   }
 
   const addCategory = (type, name) => {
