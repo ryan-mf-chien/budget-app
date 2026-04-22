@@ -11,7 +11,9 @@ const DEFAULT_CATEGORIES = {
 }
 
 async function sheetsGet() {
-  const res = await fetch(`${SHEETS_URL}?token=${encodeURIComponent(TOKEN)}`)
+  const res = await fetch(`${SHEETS_URL}?token=${encodeURIComponent(TOKEN)}`, {
+    redirect: 'follow',
+  })
   const data = await res.json()
   return data.records || []
 }
@@ -19,6 +21,7 @@ async function sheetsGet() {
 async function sheetsPost(payload) {
   await fetch(SHEETS_URL, {
     method: 'POST',
+    mode: 'no-cors',
     body: JSON.stringify({ ...payload, token: TOKEN }),
   })
 }
