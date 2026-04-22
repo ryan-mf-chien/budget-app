@@ -1,27 +1,31 @@
 import { useState } from 'react'
 
-export default function AddRecord({ categories, onAdd, onNavigate }) {
-  const [type, setType] = useState('expense')
-  const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState('')
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
-  const [note, setNote] = useState('')
+export default function AddRecord({ categories, onAdd, onUpdate, onNavigate, editRecord }) {
+  const [type, setType] = useState(editRecord?.type || 'expense')
+  const [amount, setAmount] = useState(editRecord?.amount?.toString() || '')
+  const [category, setCategory] = useState(editRecord?.category || '')
+  const [date, setDate] = useState(editRecord?.date || new Date().toISOString().slice(0, 10))
+  const [note, setNote] = useState(editRecord?.note || '')
 
   const currentCategories = categories[type]
+  const isEdit = !!editRecord
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!amount || !category) return
-    onAdd({ type, amount: Number(amount), category, date, note })
-    setAmount('')
-    setCategory('')
-    setNote('')
+    if (isEdit) {
+      onUpdate(editRecord.id, { type, amount: Number(amount), category, date, note })
+    } else {
+      onAdd({ type, amount: Number(amount), category, date, note })
+    }
     onNavigate('/')
   }
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-4">新增記帳</h1>
+      <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+        {isEdit ? '編輯記帳' : '新增記帳'}
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex rounded-xl overflow-hidden border border-gray-200">
@@ -100,6 +104,16 @@ export default function AddRecord({ categories, onAdd, onNavigate }) {
         >
           儲存
         </button>
+
+        {isEdit && (
+          <button
+            type="button"
+            onClick={() => onNavigate('/')}
+            className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl text-base font-semibold"
+          >
+            取消
+          </button>
+        )}
       </form>
     </div>
   )

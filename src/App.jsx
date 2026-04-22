@@ -8,14 +8,25 @@ import Settings from './pages/Settings'
 
 export default function App() {
   const [path, setPath] = useState('/')
-  const { records, categories, addRecord, deleteRecord, addCategory, deleteCategory } = useRecords()
+  const [editRecord, setEditRecord] = useState(null)
+  const { records, categories, addRecord, deleteRecord, updateRecord, addCategory, deleteCategory } = useRecords()
+
+  const handleEdit = (record) => {
+    setEditRecord(record)
+    setPath('/add')
+  }
+
+  const handleNavigate = (p) => {
+    if (p !== '/add') setEditRecord(null)
+    setPath(p)
+  }
 
   const renderPage = () => {
     switch (path) {
       case '/':
-        return <Home records={records} onDelete={deleteRecord} />
+        return <Home records={records} onDelete={deleteRecord} onEdit={handleEdit} />
       case '/add':
-        return <AddRecord categories={categories} onAdd={addRecord} onNavigate={setPath} />
+        return <AddRecord categories={categories} onAdd={addRecord} onUpdate={updateRecord} onNavigate={handleNavigate} editRecord={editRecord} />
       case '/analytics':
         return <Analytics records={records} />
       case '/settings':
@@ -28,7 +39,7 @@ export default function App() {
   return (
     <div className="max-w-md mx-auto min-h-screen bg-gray-50 pb-20">
       {renderPage()}
-      <BottomNav currentPath={path} onNavigate={setPath} />
+      <BottomNav currentPath={path} onNavigate={handleNavigate} />
     </div>
   )
 }

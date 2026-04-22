@@ -1,4 +1,4 @@
-export default function Home({ records }) {
+export default function Home({ records, onEdit }) {
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth() + 1
@@ -54,9 +54,12 @@ export default function Home({ records }) {
                 <p className="text-sm font-medium text-gray-800">{r.category}</p>
                 <p className="text-xs text-gray-400">{r.date}{r.note ? ` · ${r.note}` : ''}</p>
               </div>
-              <p className={`font-semibold ${r.type === 'income' ? 'text-blue-600' : 'text-red-500'}`}>
-                {r.type === 'income' ? '+' : '-'}{fmt(r.amount)}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className={`font-semibold ${r.type === 'income' ? 'text-blue-600' : 'text-red-500'}`}>
+                  {r.type === 'income' ? '+' : '-'}{fmt(r.amount)}
+                </p>
+                <button onClick={() => onEdit(r)} className="text-gray-400 text-lg">✏️</button>
+              </div>
             </div>
           ))
         )}

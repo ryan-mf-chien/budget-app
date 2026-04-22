@@ -40,6 +40,10 @@ export function useRecords() {
     setRecords((prev) => prev.filter((r) => r.id !== id))
   }
 
+  const updateRecord = (id, updated) => {
+    setRecords((prev) => prev.map((r) => (r.id === id ? { ...r, ...updated } : r)))
+  }
+
   const addCategory = (type, name) => {
     setCategories((prev) => ({
       ...prev,
@@ -54,5 +58,5 @@ export function useRecords() {
     }))
   }
 
-  return { records, categories, addRecord, deleteRecord, addCategory, deleteCategory }
+  return { records, categories, addRecord, deleteRecord, updateRecord, addCategory, deleteCategory }
 }
