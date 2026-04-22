@@ -9,7 +9,7 @@ import Settings from './pages/Settings'
 export default function App() {
   const [path, setPath] = useState('/')
   const [editRecord, setEditRecord] = useState(null)
-  const { records, categories, addRecord, deleteRecord, updateRecord, addCategory, deleteCategory } = useRecords()
+  const { records, categories, syncing, error, addRecord, deleteRecord, updateRecord, addCategory, deleteCategory } = useRecords()
 
   const handleEdit = (record) => {
     setEditRecord(record)
@@ -38,6 +38,12 @@ export default function App() {
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-gray-50 pb-20">
+      {syncing && (
+        <div className="bg-blue-50 text-blue-600 text-xs text-center py-1.5">同步中...</div>
+      )}
+      {error && (
+        <div className="bg-yellow-50 text-yellow-700 text-xs text-center py-1.5">{error}</div>
+      )}
       {renderPage()}
       <BottomNav currentPath={path} onNavigate={handleNavigate} />
     </div>
